@@ -84,7 +84,7 @@ io.sockets.on('connection', function (socket) {
         socket.broadcast.emit('updatechat', 'SERVER', socket.username + ' has disconnected');
     });
     socket.on('send:coords', function (data) {
-        socket.broadcast.emit('load:coords', data);
+        socket.broadcast.emit('load:coords', data, socket.username);
     });
 
 })
