@@ -8,9 +8,9 @@ $(function() {
     var connects = {};
     var markers = {};
     var active = false;
-    socket.on('load:coords', function(data) {
+    socket.on('load:coords', function(data,username) {
         if (!(data.id in connects)) {
-            setMarker(data);
+            setMarker(data,username);
         }
 
         connects[data.id] = data;
@@ -39,7 +39,7 @@ $(function() {
         var userMarker = new google.maps.Marker({
             position: latlng,
             map: map,
-            title:"You are here"
+            title:"Vous êtes içi"
         });
         // uncomment for static debug
         // userMarker = L.marker([51.45, 30.050], { icon: redIcon });
@@ -73,13 +73,13 @@ $(function() {
         active = false;
     });
     // showing markers for connections
-    function setMarker(data) {
+    function setMarker(data,username) {
         for (var i = 0; i < data.coords.length; i++) {
             var latlng = new google.maps.LatLng(data.coords[i].lat, data.coords[i].lng);
             var marker = new google.maps.Marker({
                 position: latlng,
                 map: map,
-                title:"You are here"
+                title:username
             });
            // alert('One more external user is here!');
             markers[data.id] = marker;
