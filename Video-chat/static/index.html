@@ -81,10 +81,6 @@
             <!-- just copy this <section> and next script -->
             <section class="experiment">                
                 <section>
-                    <span>
-                        Private ?? <a href="/video-conferencing/" target="_blank" title="Open this link in new tab. Then your conference room will be private!"><code><strong id="unique-token">#123456789</strong></code></a>
-                    </span>
-                    
                     <input type="text" id="conference-name">
                     <button id="setup-new-room" class="setup">Nouvelle conversation</button>
 
@@ -146,8 +142,8 @@
                         if (typeof roomsList === 'undefined') roomsList = document.body;
 
                         var tr = document.createElement('tr');
-                        tr.innerHTML = '<td><strong>' + room.roomName + '</strong> shared a conferencing room with you!</td>' +
-                            '<td><button class="join">Join</button></td>';
+                        tr.innerHTML = '<td><strong>' + room.roomName + '</strong> a partagé une nouvelle conférence</td>' +
+                            '<td><button class="join">Rejoindre</button></td>';
                         roomsList.insertBefore(tr, roomsList.firstChild);
 
                         var joinRoomButton = tr.querySelector('.join');
