@@ -23,7 +23,7 @@ function chat(){
         // listener, whenever the server emits 'updatechat', this updates the chat body
         socket.on('updatechat', function (username, data) {
             $('#conversation').append('<b>'+username + ':</b> ' + data+'<br>');
-            document.getElementById("chat").scrollTop =document.getElementById("chat").scrollHeight;
+            document.getElementById("conversation").scrollTop =document.getElementById("conversation").scrollHeight;
         });
 
         // listener, whenever the server emits 'updateusers', this updates the username list
@@ -47,7 +47,7 @@ function chat(){
                 socket.emit('sendchat', message);
 
                 // document.getElementById("zone").scrollTop = document.getElementById("zone").scrollHeight - document.getElementById("zone").clientHeight;
-                document.getElementById("chat").scrollTop =document.getElementById("chat").scrollHeight;
+                document.getElementById("conversation").scrollTop =document.getElementById("conversation").scrollHeight;
                 $('#data').focus();
 
             });
