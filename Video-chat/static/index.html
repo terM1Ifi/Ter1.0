@@ -8,7 +8,7 @@
         <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
         <!--<link rel="stylesheet" href="style.css">-->
         
-        <style>
+        <!--<style>
             audio, video {
                 -moz-transition: all 1s ease;
                 -ms-transition: all 1s ease;
@@ -53,7 +53,65 @@
         <script>
             document.createElement('article');
             document.createElement('footer');
-        </script>
+        </script>-->
+		
+		<style>
+            body {
+                background-image:url(http://i.stack.imgur.com/jGlzr.png);
+                background-repeat:no-repeat;
+            }
+
+            div#chat {
+                position: fixed;
+                bottom: 0%;
+                left: 36%;
+                width: 50%;
+            }
+            div#righColumn {
+                position:fixed;
+                bottom: 0;
+                left:70%;
+                width: 50%;
+            }
+            div#chat div#conversation {
+                position:absolute;
+                bottom:500px;
+                top:50%;
+                height:100px;
+                margin-top:-115px;
+                left:100%;
+                width:50%;
+                margin-left:-685px;
+                background-color: #c0c0c0;
+                border: 2px black solid;
+                overflow: auto;
+            }
+            div#chat input#data {
+                width: 40%;
+                height: 20px;
+                background-image: url(http://icons.iconarchive.com/icons/custom-icon-design/office/256/chat-icon.png);
+                text-indent: 20px;
+                background-repeat: no-repeat;
+                background-size: 20px;
+                background-position: 0px 1px;
+                margin: auto;
+            }
+            div#videos-container {
+                width:75%;
+                height:75%;
+                moz-transition: all 1s ease;
+                ms-transition: all 1s ease;
+                o-transition: all 1s ease;
+                webkit-transition: all 1s ease;
+                transition: all 1s ease;
+                vertical-align: top;
+            }
+            div#map
+            {
+                width:200px;
+                height:200px;
+            }
+        </style>
         
         <!-- scripts used for video-conferencing -->
         <script src="jquery-1.7.2.min.js"></script>
