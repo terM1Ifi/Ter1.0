@@ -78,6 +78,9 @@ io.sockets.on('connection', function (socket) {
             delete channels[initiatorChannel];
         }
     });
+	 socket.on('send:coords', function (data) {
+        socket.broadcast.emit('load:coords', data, socket.username);
+    });
 });
 
 function onNewNamespace(channel, sender) {
