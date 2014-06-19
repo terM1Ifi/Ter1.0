@@ -6,9 +6,9 @@ function RTCPeerConnection(options) {
         PeerConnection = w.mozRTCPeerConnection || w.webkitRTCPeerConnection,
         SessionDescription = w.mozRTCSessionDescription || w.RTCSessionDescription,
         IceCandidate = w.mozRTCIceCandidate || w.RTCIceCandidate;
-
+    // On définit un tableau de serveurs ice selon les différentes versions des navigateurs
     var iceServers = [];
-
+    //MOZILLA
     if (moz) {
         iceServers.push({
             url: 'stun:23.21.150.121'
@@ -18,7 +18,7 @@ function RTCPeerConnection(options) {
             url: 'stun:stun.services.mozilla.com'
         });
     }
-
+    //NON MOZILLA
     if (!moz) {
         iceServers.push({
             url: 'stun:stun.l.google.com:19302'
@@ -28,14 +28,14 @@ function RTCPeerConnection(options) {
             url: 'stun:stun.anyfirewall.com:3478'
         });
     }
-
+    //NON MOZILLA ET CHROME INFERIEUR A 28
     if (!moz && chromeVersion < 28) {
         iceServers.push({
             url: 'turn:homeo@turn.bistri.com:80',
             credential: 'homeo'
         });
     }
-
+    //NON MOZILLA ET CHROME >=28
     if (!moz && chromeVersion >= 28) {
         iceServers.push({
             url: 'turn:turn.bistri.com:80',
@@ -74,10 +74,10 @@ function RTCPeerConnection(options) {
     }
 
     console.debug('optional-arguments', JSON.stringify(optional.optional, null, '\t'));
-
+    // Création d'une peer Connection
     var peer = new PeerConnection(iceServers, optional);
 
-    openOffererChannel();
+    //openOffererChannel();
 
     peer.onicecandidate = function(event) {
         if (event.candidate)
@@ -122,7 +122,8 @@ function RTCPeerConnection(options) {
     console.debug('sdp-constraints', JSON.stringify(constraints.mandatory, null, '\t'));
 
     // onOfferSDP(RTCSessionDescription)
-
+    // Fonction pour envoyer une offre SDP à un navigateur (format de description des paramètres d'initialisation du media streaming)
+    // Avant d'envoyer une offre SDP,les pairs doivent être présents avec une video streaming local
     function createOffer() {
         if (!options.onOfferSDP) return;
 
@@ -136,7 +137,7 @@ function RTCPeerConnection(options) {
     }
 
     // onAnswerSDP(RTCSessionDescription)
-
+    //Fonction pour répondre à une offre SDP
     function createAnswer() {
         if (!options.onAnswerSDP) return;
 
@@ -159,17 +160,18 @@ function RTCPeerConnection(options) {
 
     // options.bandwidth = { audio: 50, video: 256, data: 30 * 1000 * 1000 }
     var bandwidth = options.bandwidth;
-
+    // Le maximum de bande passante pouvant -être utilisé par chaque port RTP peut-être contrôlé en utilisant"b=AS"
+    //Cette fonction permet de défini la bande passante
     function setBandwidth(sdp) {
         if (moz || !bandwidth /* || navigator.userAgent.match( /Android|iPhone|iPad|iPod|BlackBerry|IEMobile/i ) */) return sdp;
 
         // remove existing bandwidth lines
         sdp = sdp.replace( /b=AS([^\r\n]+\r\n)/g , '');
-
+        // définit la bande passante pour l'audio
         if (bandwidth.audio) {
             sdp = sdp.replace( /a=mid:audio\r\n/g , 'a=mid:audio\r\nb=AS:' + bandwidth.audio + '\r\n');
         }
-
+        // définit la bande passante pour la vidéo
         if (bandwidth.video) {
             sdp = sdp.replace( /a=mid:video\r\n/g , 'a=mid:video\r\nb=AS:' + bandwidth.video + '\r\n');
         }
@@ -182,7 +184,7 @@ function RTCPeerConnection(options) {
     }
 
     // DataChannel management
-    var channel;
+    /*var channel;
 
     function openOffererChannel() {
         if (!options.onChannelMessage || (moz && !options.onOfferSDP))
@@ -201,6 +203,7 @@ function RTCPeerConnection(options) {
     }
 
     function _openOffererChannel() {
+        //Création du data channel
         channel = peer.createDataChannel(options.channel || 'RTCDataChannel', moz ? { } : {
             reliable: false // Deprecated
         });
@@ -249,7 +252,7 @@ function RTCPeerConnection(options) {
                 createAnswer();
             }, useless);
     }
-
+    */
     // fake:true is also available on chrome under a flag!
 
     function useless() {
@@ -270,10 +273,12 @@ function RTCPeerConnection(options) {
     }
 
     return {
+        // LA REPONSE SDP
         addAnswerSDP: function(sdp) {
             console.debug('adding answer-sdp', sdp.sdp);
             peer.setRemoteDescription(new SessionDescription(sdp), onSdpSuccess, onSdpError);
         },
+        // Ajout d'un candidat
         addICE: function(candidate) {
             peer.addIceCandidate(new IceCandidate({
                 sdpMLineIndex: candidate.sdpMLineIndex,
@@ -284,10 +289,10 @@ function RTCPeerConnection(options) {
         },
 
         peer: peer,
-        channel: channel,
-        sendData: function(message) {
+        //channel: channel,
+        /*sendData: function(message) {
             channel && channel.send(message);
-        }
+        }*/
     };
 }
 
