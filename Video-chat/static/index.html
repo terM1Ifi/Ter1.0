@@ -243,7 +243,7 @@
                         if (location.hash.length > 2) uniqueToken.parentNode.parentNode.parentNode.innerHTML = '<h2 style="text-align:center;"><a href="' + location.href + '" target="_blank">Share this link</a></h2>';
                         else uniqueToken.innerHTML = uniqueToken.parentNode.parentNode.href = '#' + (Math.random() * new Date().getTime()).toString(36).toUpperCase().replace( /\./g , '-');
                 })();
-
+		// redimensionne la vidéo
                 function scaleVideos() {
                     var videos = document.querySelectorAll('video'),
                         length = videos.length, video;
