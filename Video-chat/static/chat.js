@@ -10,6 +10,7 @@ function chat(){
         socket.on('connect', function(){
             // call the server-side function 'adduser' and send one parameter (value of prompt)
             socket.emit('adduser', prompt("What's your name?"));
+            //charge la map
             $.getScript( "map.js" )
                 .done(function( script, textStatus ) {
                     console.log( textStatus );
