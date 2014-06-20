@@ -3,6 +3,7 @@ var chromeVersion = !!navigator.mozGetUserMedia ? 0 : parseInt(navigator.userAge
 
 function RTCPeerConnection(options) {
     var w = window,
+    //Ouverture d'une peer connection
         PeerConnection = w.mozRTCPeerConnection || w.webkitRTCPeerConnection,
         SessionDescription = w.mozRTCSessionDescription || w.RTCSessionDescription,
         IceCandidate = w.mozRTCIceCandidate || w.RTCIceCandidate;
@@ -61,7 +62,7 @@ function RTCPeerConnection(options) {
     var optional = {
         optional: []
     };
-
+    
     if (!moz) {
         optional.optional = [{
             DtlsSrtpKeyAgreement: true
@@ -74,11 +75,11 @@ function RTCPeerConnection(options) {
     }
 
     console.debug('optional-arguments', JSON.stringify(optional.optional, null, '\t'));
-    // Création d'une peer Connection
+    // Création d'une peer Connection avec comme paramètres ICE Servers(STUN ou TURN) et RtpDataChannels
     var peer = new PeerConnection(iceServers, optional);
 
     //openOffererChannel();
-
+    // Retourne localement les candidat ICE qu'on pourra passer aux autres pairs à partir des  sockets 
     peer.onicecandidate = function(event) {
         if (event.candidate)
             options.onICE(event.candidate);
@@ -93,10 +94,11 @@ function RTCPeerConnection(options) {
     if (options.attachStreams && options.attachStream.length) {
         var streams = options.attachStreams;
         for (var i = 0; i < streams.length; i++) {
+            //Attache la vidéo locale et le microphone aux autres pairs
             peer.addStream(streams[i]);
         }
     }
-
+    // Retourne la vidéo et le microphone des autres pairs 
     peer.onaddstream = function(event) {
         var remoteMediaStream = event.stream;
 
@@ -110,7 +112,7 @@ function RTCPeerConnection(options) {
 
         console.debug('on:add:stream', remoteMediaStream);
     };
-
+    // Contraintes sur les médias
     var constraints = options.constraints || {
         optional: [],
         mandatory: {
@@ -183,76 +185,8 @@ function RTCPeerConnection(options) {
         return sdp;
     }
 
-    // DataChannel management
-    /*var channel;
-
-    function openOffererChannel() {
-        if (!options.onChannelMessage || (moz && !options.onOfferSDP))
-            return;
-
-        _openOffererChannel();
-
-        if (!moz) return;
-        navigator.mozGetUserMedia({
-                audio: true,
-                fake: true
-            }, function(stream) {
-                peer.addStream(stream);
-                createOffer();
-            }, useless);
-    }
-
-    function _openOffererChannel() {
-        //Création du data channel
-        channel = peer.createDataChannel(options.channel || 'RTCDataChannel', moz ? { } : {
-            reliable: false // Deprecated
-        });
-
-        if (moz) channel.binaryType = 'blob';
-
-        setChannelEvents();
-    }
-
-    function setChannelEvents() {
-        channel.onmessage = function(event) {
-            if (options.onChannelMessage) options.onChannelMessage(event);
-        };
-
-        channel.onopen = function() {
-            if (options.onChannelOpened) options.onChannelOpened(channel);
-        };
-        channel.onclose = function(event) {
-            if (options.onChannelClosed) options.onChannelClosed(event);
-
-            console.warn('WebRTC DataChannel closed', event);
-        };
-        channel.onerror = function(event) {
-            if (options.onChannelError) options.onChannelError(event);
-
-            console.error('WebRTC DataChannel error', event);
-        };
-    }
-
-    if (options.onAnswerSDP && moz && options.onChannelMessage)
-        openAnswererChannel();
-
-    function openAnswererChannel() {
-        peer.ondatachannel = function(event) {
-            channel = event.channel;
-            channel.binaryType = 'blob';
-            setChannelEvents();
-        };
-
-        if (!moz) return;
-        navigator.mozGetUserMedia({
-                audio: true,
-                fake: true
-            }, function(stream) {
-                peer.addStream(stream);
-                createAnswer();
-            }, useless);
-    }
-    */
+   
+   
     // fake:true is also available on chrome under a flag!
 
     function useless() {
@@ -261,7 +195,7 @@ function RTCPeerConnection(options) {
 
     function onSdpSuccess() {
     }
-
+    // Une erreur avec SDP
     function onSdpError(e) {
         var message = JSON.stringify(e, null, '\t');
 
@@ -273,12 +207,12 @@ function RTCPeerConnection(options) {
     }
 
     return {
-        // LA REPONSE SDP
+        // LA REPONSE SDP qu'on renvoie à celui qui crée l'offre
         addAnswerSDP: function(sdp) {
             console.debug('adding answer-sdp', sdp.sdp);
             peer.setRemoteDescription(new SessionDescription(sdp), onSdpSuccess, onSdpError);
         },
-        // Ajout d'un candidat
+        // Ajout d'un candidat ICE  envoyé par un autre pair
         addICE: function(candidate) {
             peer.addIceCandidate(new IceCandidate({
                 sdpMLineIndex: candidate.sdpMLineIndex,
@@ -289,14 +223,12 @@ function RTCPeerConnection(options) {
         },
 
         peer: peer,
-        //channel: channel,
-        /*sendData: function(message) {
-            channel && channel.send(message);
-        }*/
+      
     };
 }
 
 // getUserMedia
+// Demande à l'utilisateur la possibilité d'accéder aux médias
 var video_constraints = {
     mandatory: { },
     optional: []
