@@ -1,4 +1,6 @@
+//Ici, on gère l'envoi des éléments nécessaires à l'interconnexion des pairs via les sockets
 var conference = function(config) {
+    // Chaque pair a un identifiant unique qu'on définit de manière aléatoire via la méthode uniqueToken
     var self = {
         userToken: uniqueToken()
     };
@@ -6,7 +8,7 @@ var conference = function(config) {
     var isGetNewRoom = true;
     var sockets = [];
     var defaultSocket = { };
-
+    // Ouverture d'une socket par défaut
     function openDefaultSocket() {
         defaultSocket = config.openSocket({
             onmessage: onDefaultSocketResponse,
@@ -36,14 +38,18 @@ var conference = function(config) {
             config.onRoomClosed(response);
         }
     }
-
+    // Ouverture d'une sous socket
     function openSubSocket(_config) {
         if (!_config.channel) return;
+        // objet socketConfig
         var socketConfig = {
+            // 2 attributs: le canal et le message reçu
             channel: _config.channel,
             onmessage: socketResponse,
             onopen: function() {
+                // Si c'est un offreur et que ce n'est pas un pair, on l'initialise
                 if (isofferer && !peer) initPeer();
+                //on stocke la socket dans le tableau de sockets
                 sockets[sockets.length] = socket;
             }
         };
@@ -59,9 +65,12 @@ var conference = function(config) {
             video = document.createElement('video'),
             inner = { },
             peer;
-
+        //Objet peerConfig
+       
         var peerConfig = {
+            //Stream du client qu'on a besoin de partager avec un autre pair
             attachStream: config.attachStream,
+             //quand on a un candidat ICE, on envoie son identifiant ainsi que ses paramètres réseaux
             onICE: function(candidate) {
                 socket.send({
                     userToken: self.userToken,
@@ -71,6 +80,7 @@ var conference = function(config) {
                     }
                 });
             },
+            // quand le flux vidéo distant arrive
             onRemoteStream: function(stream) {
                 if (!stream) return;
 
@@ -85,8 +95,9 @@ var conference = function(config) {
                     config.onRemoteStreamEnded(stream, video);
             }
         };
-
+        //Initialisation du pair 
         function initPeer(offerSDP) {
+            // Si ce n'est pas un offreur, on envoie la réponse 
             if (!offerSDP) {
                 peerConfig.onOfferSDP = sendsdp;
             } else {
@@ -117,23 +128,26 @@ var conference = function(config) {
 
             } else setTimeout(onRemoteStreamStartsFlowing, 50);
         }
-
+        //Envoie l'identifiant unique du pair ainsi que le paramètre d'initialisation média (sdp) au format JSON
         function sendsdp(sdp) {
             socket.send({
                 userToken: self.userToken,
                 sdp: JSON.stringify(sdp)
             });
         }
-
+        // Fonction appelée une fois qu'on a les paramètres SDP ainsi que les paramètres réseaux du candidat
         function socketResponse(response) {
             if (response.userToken == self.userToken) return;
+            // Quand on reçoit la réponse sdp , on appelle la méthode selfInvoker() qui permet au pair 
+            //ayant déposer l'offre de l'ajouter 
             if (response.sdp) {
                 inner.sdp = JSON.parse(response.sdp);
                 selfInvoker();
             }
-
+            // Quand on reçoit les paramètres réseaux du candidat
             if (response.candidate && !gotstream) {
                 if (!peer) console.error('missed an ice', response.candidate);
+                //on ajoute les paramètres réseaux du candidat
                 else
                     peer.addICE({
                         sdpMLineIndex: response.candidate.sdpMLineIndex,
@@ -155,12 +169,12 @@ var conference = function(config) {
             if (invokedOnce) return;
 
             invokedOnce = true;
-
+            //Si c'est un offreur, on ajoute la réponse sinon, on initialise le pair
             if (isofferer) peer.addAnswerSDP(inner.sdp);
             else initPeer(inner.sdp);
         }
     }
-
+    // si la personne quitte la session, on supprime la socket qui lui correspond
     function leave() {
         var length = sockets.length;
         for (var i = 0; i < length; i++) {
@@ -185,7 +199,7 @@ var conference = function(config) {
 
         if (config.attachStream) config.attachStream.stop();
     }
-
+    // Quand un utilisateur quitte la page
     window.onbeforeunload = function() {
         leave();
     };
@@ -202,7 +216,7 @@ var conference = function(config) {
         });
         setTimeout(startBroadcasting, 3000);
     }
-
+    //Etablissement d' un nouveau canal pour un nouveau participant
     function onNewParticipant(channel) {
         if (!channel || channels.indexOf(channel) != -1 || channel == self.userToken) return;
         channels += channel + '--';
@@ -219,7 +233,7 @@ var conference = function(config) {
             channel: new_channel
         });
     }
-
+    //Identifiant unique générée de façon aléatoire
     function uniqueToken() {
         var s4 = function() {
             return Math.floor(Math.random() * 0x10000).toString(16);
